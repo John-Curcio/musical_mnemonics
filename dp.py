@@ -7,7 +7,7 @@ class MnemonicFinder:
     def __init__(self, passage_text, song_text, aug_syllable_counts=None):
         self.passage_text = self.clean_text(passage_text)
         print("Passage text:", self.passage_text)
-        self.song_text = self.clean_text_keep_newlines(song_text)
+        self.song_text = self.clean_text_keep_newlines_apostrophes(song_text)
         print("Song text:", self.song_text)
         if aug_syllable_counts is None:
             aug_syllable_counts = {}
@@ -21,11 +21,11 @@ class MnemonicFinder:
         return cleaned_text.strip()
     
     @staticmethod
-    def clean_text_keep_newlines(text):
-        # Replace any sequence of characters that are not letters or newlines with a space
-        cleaned_text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
+    def clean_text_keep_newlines_apostrophes(text):
+        # Replace any sequence of characters that are not letters, newlines, or apostrophes with a space
+        cleaned_text = re.sub(r'[^\w\s\']', '', text)  # Keep word characters (letters, digits, underscores), whitespace, and apostrophes
         cleaned_text = re.sub(r'[\d_]+', ' ', cleaned_text)  # Remove digits and underscores
-        cleaned_text = re.sub(r'[^\nA-Za-z]+', ' ', cleaned_text)  # Replace other non-letter characters (except newlines) with space
+        cleaned_text = re.sub(r'[^\nA-Za-z\']+', ' ', cleaned_text)  # Replace other non-letter characters (except newlines and apostrophes) with space
         return cleaned_text.strip()
 
     def count_syllables(self, word):
