@@ -1,0 +1,12 @@
+name: musical_mnemonics
+channels:
+  - defaults
+dependencies:
+  - python=3.9
+  - numpy
+  - pip
+  - tqdm
+  - ipython
+  - pandas
+  - pip:
+    - cmudict
