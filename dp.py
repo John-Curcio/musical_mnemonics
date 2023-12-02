@@ -5,7 +5,7 @@ import re
 class MnemonicFinder:
 
     def __init__(self, passage_text, song_text, aug_syllable_counts=None):
-        self.passage_text = self.clean_text(passage_text)
+        self.passage_text = self.clean_text_keep_newlines_apostrophes(passage_text)
         print("Passage text:", self.passage_text)
         self.song_text = self.clean_text_keep_newlines_apostrophes(song_text)
         print("Song text:", self.song_text)
@@ -13,12 +13,13 @@ class MnemonicFinder:
             aug_syllable_counts = {}
         self.aug_syllable_counts = aug_syllable_counts
         self._cmudict = cmudict.dict()
+        self.soln = None
 
-    @staticmethod
-    def clean_text(text):
-        # Replace any non-alphabetical characters with a space
-        cleaned_text = re.sub(r'[^a-zA-Z]+', ' ', text)
-        return cleaned_text.strip()
+    # @staticmethod
+    # def clean_text(text):
+    #     # Replace any non-alphabetical characters with a space
+    #     cleaned_text = re.sub(r'[^a-zA-Z]+', ' ', text)
+    #     return cleaned_text.strip()
     
     @staticmethod
     def clean_text_keep_newlines_apostrophes(text):
@@ -30,13 +31,11 @@ class MnemonicFinder:
 
     def count_syllables(self, word):
         word = word.lower()
-        
-
         if word not in self._cmudict:
             if word in self.aug_syllable_counts:
                 return self.aug_syllable_counts[word]
             else:
-                raise ValueError("Word not found in cmudict:", word)
+                raise ValueError("Word not found in augmented cmudict:", word)
 
         # Count the number of syllables: each digit in the phonetic transcription represents a syllable
         # In the phonetic transcription, the stress of the syllable is indicated by a digit at the end of the syllable
@@ -46,19 +45,32 @@ class MnemonicFinder:
     def count_syllables_in_line(self, line):
         return sum([self.count_syllables(word) for word in line.split()])
     
-    def align(self, max_lines=6):
-        passage_words = self.passage_text.split()
+    def align(self, max_lines=np.inf):
+        passage_lines = self.passage_text.split('\n')
         song_lines = self.song_text.split('\n')
-        passage_syllables = [self.count_syllables(word) for word in passage_words]
+        passage_line_syll_counts = [self.count_syllables_in_line(word) for word in passage_lines]
         # print("Passage syllables:", passage_syllables)
-        line_syllables = [self.count_syllables_in_line(line) for line in song_lines]
+        song_lines = [self.count_syllables_in_line(line) for line in song_lines]
         # print("Line syllables:", line_syllables)
-        passage_line_breaks = align(passage_syllables, line_syllables, max_lines=max_lines)
+        passage_line_breaks = align(passage_line_syll_counts, song_lines, max_lines=max_lines)
         passage_line_breaks = [0] + [x+1 for x in passage_line_breaks]
-        return [" ".join(passage_words[passage_line_breaks[i]:passage_line_breaks[i+1]])
-                for i in range(len(passage_line_breaks)-1)]
+        print(passage_line_breaks)
+        self.soln = [" ".join(passage_lines[passage_line_breaks[i]:passage_line_breaks[i+1]])
+            for i in range(len(passage_line_breaks)-1)]
+        return self.soln
 
-def align(passage_words, song_lines, max_lines=6):
+    def display_soln(self):
+        if self.soln is None:
+            raise ValueError("No solution found yet")
+        song_lines = self.song_text.split('\n')
+        for i, line in enumerate(self.soln):
+            soln_line_syllables = self.count_syllables_in_line(line)
+            song_line_syallables = self.count_syllables_in_line(song_lines[i])
+            syllable_diff = soln_line_syllables - song_line_syallables
+            # display line and number of syllables to add or remove
+            print(line, syllable_diff)
+
+def align(passage_lines, song_lines, max_lines=np.inf):
     """
     How do we construct s_hat?
     There's a corresponding sequence breaks of length r-l+1
@@ -105,10 +117,10 @@ def align(passage_words, song_lines, max_lines=6):
 
     """
     max_lines = min(max_lines, len(song_lines))
-    n_words = len(passage_words)
-    # passage_prefix_sum[i] = sum(passage_words[:i])
-    # passage_prefix_sums[0] = sum(passage_words[:0]) = 0
-    passage_prefix_sums = [0] + list(np.cumsum(passage_words))
+    n_words = len(passage_lines)
+    # passage_prefix_sum[i] = sum(passage_lines[:i])
+    # passage_prefix_sums[0] = sum(passage_lines[:0]) = 0
+    passage_prefix_sums = [0] + list(np.cumsum(passage_lines))
     
     def cost(passage_start, passage_end, line_index):
         """
@@ -156,26 +168,28 @@ def align(passage_words, song_lines, max_lines=6):
     print("Best soln is", best_soln[0], "with cost", best_soln[1])
     return best_soln[0]
 
-test_passage = """
-The sieve of eratosthenes,
-the sieve of eratosthenes, 
-for i in range two square root n plus one,
-if i is prime then loop through j from i squared up to n plus one with step size i
-and mark j as not prime
-"""
-test_song = """
-Look for the bare necessities
-The simple bare necessities
-Forget about your worries and your strife
-I mean the bare necessities
-Old Mother Nature's recipes
-That bring the bare necessities of life
-Wherever I wander, wherever I roam
-"""
-aug_syllable_counts = {
-    "eratosthenes": 5,
-}
+if __name__ == "__main__":
 
-mnem = MnemonicFinder(test_passage, test_song, aug_syllable_counts)
-soln = mnem.align()
-print("\n-----\n".join(soln))
+    test_passage = """
+    The sieve of eratosthenes,
+    the sieve of eratosthenes, 
+    for i in range two square root n plus one,
+    if i is prime then loop through j from i squared up to n plus one with step size i
+    and mark j as not prime
+    """
+    test_song = """
+    Look for the bare necessities
+    The simple bare necessities
+    Forget about your worries and your strife
+    I mean the bare necessities
+    Old Mother Nature's recipes
+    That bring the bare necessities of life
+    Wherever I wander, wherever I roam
+    """
+    aug_syllable_counts = {
+        "eratosthenes": 5,
+    }
+
+    mnem = MnemonicFinder(test_passage, test_song, aug_syllable_counts)
+    soln = mnem.align()
+    print("\n-----\n".join(soln))
