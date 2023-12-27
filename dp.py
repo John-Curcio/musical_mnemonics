@@ -235,8 +235,14 @@ class StressMnemonicFinder(SingleSongMnemonicFinder):
             return self.aug_syllables[word]
         if word not in self._cmudict:
             raise ValueError("Word not found in cmudict:", word)
-        return [int(phoneme[-1]) for phoneme in self._cmudict[word][0]
+        ans = [int(phoneme[-1]) for phoneme in self._cmudict[word][0]
                 if phoneme[-1].isdigit()]
+        if len(ans) == 0:
+            raise ValueError("No stresses found in word:", word)
+        if len(ans) == 1:
+            # if there's only one syllable, we can treat it as a wild card
+            return [2]
+        return ans
     
     def extract_stresses_from_line(self, line):
         return [stress for word in line.split() 
@@ -245,20 +251,18 @@ class StressMnemonicFinder(SingleSongMnemonicFinder):
     def align_stresses(self):
         passage_lines = self.passage_text.split('\n')
         song_lines = self.song_text.split('\n')
-        self.passage_line_stresses = [
-            # [self.extract_stresses_from_word(word) for word in line.split()]
-            self.extract_stresses_from_line(line)
-            for line in passage_lines
-        ]
-        print(self.passage_line_stresses)
-        self.song_line_stresses = [
-            self.extract_stresses_from_line(line)
-            for line in song_lines
-        ]
-        print(self.song_line_stresses)
-        # soln takes the form of a list [
-        #   (passage_line_index, passage_syllable_index, song_line_index, song_syllable_index)
-        #]
+        self.passage_line_stresses = []
+        for line in passage_lines:
+            self.passage_line_stresses.append(3)
+            self.passage_line_stresses.extend(self.extract_stresses_from_line(line))
+        self.passage_line_stresses = self.passage_line_stresses[1:]
+        
+        self.song_line_stresses = []
+        for line in song_lines:
+            self.song_line_stresses.append(3)
+            self.song_line_stresses.extend(self.extract_stresses_from_line(line))
+        self.song_line_stresses = self.song_line_stresses[1:]
+
         soln_cost, soln = dp_solve_stresses(
             self.passage_line_stresses, 
             self.song_line_stresses, 
@@ -267,31 +271,55 @@ class StressMnemonicFinder(SingleSongMnemonicFinder):
         self.soln_cost = soln_cost
         print("Solution cost:", soln_cost)
         print("Solution:", soln)
-        # TODO: this solution is very difficult to represent as text
-        # for p_line, p_syllable, s_line, s_syllable in soln:
-            
-
-
-        # passage_line_breaks = [0] + [x+1 for x in passage_line_breaks]
-        # self.soln = [" ".join(passage_lines[passage_line_breaks[i]:passage_line_breaks[i+1]])
-        #     for i in range(len(passage_line_breaks)-1)]
-        # self.soln_cost = soln_cost
-        # return self.soln
 
     def display_soln(self):
         # soln takes the form of a list [
         #   (passage_line_index, passage_syllable_index, song_line_index, song_syllable_index)
         #]
+        print("Song:", self.song_name)
         print("Solution cost:", self.soln_cost)
-        print("Solution:", self.soln)
+        # print("Solution:", self.soln)
 
         passage_words = [line.split() for line in self.passage_text.split('\n')]
-        
-        p_word_index = 0
-        for p_line, p_syllable, s_line, s_syllable in self.soln:
+        passage_stress_to_word_dict = {}
+        i = 0
+        for line in passage_words:
+            for word in line:
+                passage_stress_to_word_dict[i] = word
+                i += len(self.extract_stresses_from_word(word))
+            i += 1 # new line counts as a stress
+        song_words = [line.split() for line in self.song_text.split('\n')]
+        song_stress_to_word_dict = {}
+        i = 0
+        for line in song_words:
+            for word in line:
+                song_stress_to_word_dict[i] = word
+                i += len(self.extract_stresses_from_word(word))
+            i += 1
+
+        passage_block = []
+        song_block = []
+        for i_p, i_s in self.soln:
+            p_stress, s_stress = self.passage_line_stresses[i_p], self.song_line_stresses[i_s]
+            if p_stress == s_stress == 3:
+                print(passage_block)
+                print(song_block)
+                print("----")
+                passage_block = []
+                song_block = []
+            else:
+                if i_p in passage_stress_to_word_dict:
+                    passage_block.append(passage_stress_to_word_dict[i_p])
+                if i_s in song_stress_to_word_dict:
+                    song_block.append(song_stress_to_word_dict[i_s])
+        print(passage_block)
+        print(song_block)
+        print("----")
+        # p_word_index = 0
+        # for p_line, p_syllable, s_line, s_syllable in self.soln:
             
-            print(f"Passage line {p_line}, syllable {p_syllable} matches song line {s_line}, syllable {s_syllable}")
-            print(f"{self.passage_line_stresses[p_line][p_syllable]} {self.song_line_stresses[s_line][s_syllable]}")
+        #     print(f"Passage line {p_line}, syllable {p_syllable} matches song line {s_line}, syllable {s_syllable}")
+        #     print(f"{self.passage_line_stresses[p_line][p_syllable]} {self.song_line_stresses[s_line][s_syllable]}")
 
     
 def print_passages_side_by_side(passage1, passage2, title1="Song", title2="Passage"):
