@@ -5,22 +5,26 @@ import os
 from dp_syllables import dp_solve_stresses
 from tqdm import tqdm
 import json
+import argparse
 
 def default_cost(diff):
     # it's better to be too short than too long
     if diff > 0:
-        return 5 * diff**2
+        return 10 * diff
+        # return 5 * diff**2
     else:
-        return abs(diff)**2
+        return abs(diff)
+        # return abs(diff)**2
 
 class MultiSongMnemonicFinder:
 
-    def __init__(self, passage_text, song_folder, aug_syllables=None, custom_cost=None):
+    def __init__(self, passage_text, song_folder, aug_syllables=None, use_stresses=True, custom_cost=None):
         self.passage_text = SingleSongMnemonicFinder.clean_text_keep_newlines_apostrophes(passage_text)
         self.song_folder = song_folder
         if aug_syllables is None:
             aug_syllables = {}
         self.aug_syllables = aug_syllables
+        self.use_stresses = use_stresses
         if custom_cost is None:
             custom_cost = default_cost
         self.custom_cost = custom_cost
@@ -35,23 +39,29 @@ class MultiSongMnemonicFinder:
                 songs[song] = f.read()
         return songs
 
-    def solve(self, use_stresses=False):
+    def solve(self):
         # for song in songs, find the best alignment
         # return best alignment of all songs
         song_texts = self.get_songs()
         song_solns = []
         for song_name, song_text in tqdm(song_texts.items()):
-            single_song_mnem = SingleSongMnemonicFinder(
-                self.passage_text, 
-                song_text, 
-                self.aug_syllables,
-                self.custom_cost,
-                song_name,
-            )
-            if use_stresses:
-                single_song_mnem.align_stresses()
+            if self.use_stresses:
+                single_song_mnem = StressMnemonicFinder(
+                    self.passage_text, 
+                    song_text, 
+                    self.aug_syllables,
+                    self.custom_cost,
+                    song_name,
+                )
             else:
-                single_song_mnem.align()
+                single_song_mnem = SingleSongMnemonicFinder(
+                    self.passage_text, 
+                    song_text, 
+                    self.aug_syllables,
+                    self.custom_cost,
+                    song_name,
+                )
+            single_song_mnem.align()
             song_solns.append(single_song_mnem)
         song_solns = sorted(song_solns, key=lambda x: x.soln_cost)
         self.soln = song_solns[0]
@@ -248,7 +258,7 @@ class StressMnemonicFinder(SingleSongMnemonicFinder):
         return [stress for word in line.split() 
                 for stress in self.extract_stresses_from_word(word)]
     
-    def align_stresses(self):
+    def align(self):
         passage_lines = self.passage_text.split('\n')
         song_lines = self.song_text.split('\n')
         self.passage_line_stresses = []
@@ -269,13 +279,12 @@ class StressMnemonicFinder(SingleSongMnemonicFinder):
         )
         self.soln = soln
         self.soln_cost = soln_cost
-        print("Solution cost:", soln_cost)
-        print("Solution:", soln)
 
     def display_soln(self):
         # soln takes the form of a list [
         #   (passage_line_index, passage_syllable_index, song_line_index, song_syllable_index)
         #]
+        print(self.soln)
         print("Song:", self.song_name)
         print("Solution cost:", self.soln_cost)
         # print("Solution:", self.soln)
@@ -299,21 +308,26 @@ class StressMnemonicFinder(SingleSongMnemonicFinder):
 
         passage_block = []
         song_block = []
-        for i_p, i_s in self.soln:
+        curr_cost = 0
+        for i_p, i_s, marginal_cost in self.soln:
             p_stress, s_stress = self.passage_line_stresses[i_p], self.song_line_stresses[i_s]
+            curr_cost += marginal_cost
             if p_stress == s_stress == 3:
-                print(passage_block)
                 print(song_block)
+                print(passage_block)
+                print("Cost of block:", curr_cost)
                 print("----")
                 passage_block = []
                 song_block = []
+                curr_cost = 0
             else:
                 if i_p in passage_stress_to_word_dict:
                     passage_block.append(passage_stress_to_word_dict[i_p])
                 if i_s in song_stress_to_word_dict:
                     song_block.append(song_stress_to_word_dict[i_s])
-        print(passage_block)
         print(song_block)
+        print(passage_block)
+        print("Cost of block:", curr_cost)
         print("----")
         # p_word_index = 0
         # for p_line, p_syllable, s_line, s_syllable in self.soln:
@@ -346,58 +360,61 @@ def print_passages_side_by_side(passage1, passage2, title1="Song", title2="Passa
 
 if __name__ == "__main__":
 
-    with open("passages/sieve.txt", 'r') as f:
-        passage_text = f.read()
-    aug_syllables_json = json.load(open("aug_syllables.json", 'r'))
-    aug_syllables_dict = {row["word"]: row["stresses"] 
-                          for row in aug_syllables_json["words"]}
-    with open("songs/bare_necessities.txt", 'r') as f:
-        song_text = f.read()
-    single_song_mnem = StressMnemonicFinder(
-        passage_text, song_text, aug_syllables_dict
-    )
-    single_song_mnem.align_stresses()
-    single_song_mnem.display_soln()
-
-
-
-
-    # # accept passage and song as command line arguments
-    # import argparse
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("passage_file", help="path to passage file")
-    # # add flag for whether to use stresses or just count syllables, default to syllables
-    # parser.add_argument("--stress", action="store_true", help="use stresses instead of syllables")
-    # parser.add_argument("--song_file", help="path to song file")
-    # # parser.add_argument("song_folder", help="path to folder containing songs")
-    # args = parser.parse_args()
-
-    # # read passage and song
-    # with open(os.path.join("passages", args.passage_file), 'r') as f:
+    # with open("passages/sieve.txt", 'r') as f:
     #     passage_text = f.read()
-    # # song_folder = args.song_folder
-    # # song_folder = "songs"
     # aug_syllables_json = json.load(open("aug_syllables.json", 'r'))
     # aug_syllables_dict = {row["word"]: row["stresses"] 
     #                       for row in aug_syllables_json["words"]}
+    # with open("songs/bare_necessities.txt", 'r') as f:
+    #     song_text = f.read()
+    # single_song_mnem = StressMnemonicFinder(
+    #     passage_text, song_text, aug_syllables_dict
+    # )
+    # single_song_mnem.align_stresses()
+    # single_song_mnem.display_soln()
 
-    # use_stresses = args.stress
+
+
+
+    # accept passage and song as command line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("passage_file", help="path to passage file")
+    # add flag for whether to use stresses or just count syllables, default to syllables
+    parser.add_argument("--stress", action="store_true", help="use stresses instead of syllables")
+    parser.add_argument("--song_file", help="path to song file")
+    # parser.add_argument("song_folder", help="path to folder containing songs")
+    args = parser.parse_args()
+
+    # read passage and song
+    with open(args.passage_file, 'r') as f:
+        passage_text = f.read()
+    # song_folder = args.song_folder
+    # song_folder = "songs"
+    aug_syllables_json = json.load(open("aug_syllables.json", 'r'))
+    aug_syllables_dict = {row["word"]: row["stresses"] 
+                          for row in aug_syllables_json["words"]}
+
+    use_stresses = args.stress
     
-    # if args.song_file is not None:
-    #     # with open(os.path.join("songs", args.song_file), 'r') as f:
-    #     with open(args.song_file, 'r') as f:
-    #         song_text = f.read()
-    #     # find best alignment
-    #     single_song_mnem = SingleSongMnemonicFinder(
-    #         passage_text, song_text, aug_syllables_dict
-    #     )
-    #     if use_stresses:
-    #         single_song_mnem.align_stresses()
-    #     else:
-    #         single_song_mnem.align()
-    #         single_song_mnem.display_soln()
-    # else:
-    #     # find best alignment
-    #     mnem_finder = MultiSongMnemonicFinder(passage_text, song_folder="songs", aug_syllables_dict)
-    #     mnem_finder.solve()
-    #     # mnem_finder.display_soln()
+    if args.song_file is not None:
+        # with open(os.path.join("songs", args.song_file), 'r') as f:
+        with open(args.song_file, 'r') as f:
+            song_text = f.read()
+        # find best alignment
+        if use_stresses:
+            single_song_mnem = StressMnemonicFinder(
+                passage_text, song_text, aug_syllables_dict
+            )
+        else:
+            single_song_mnem = SingleSongMnemonicFinder(
+                passage_text, song_text, aug_syllables_dict
+            )
+        single_song_mnem.align()
+        single_song_mnem.display_soln()
+    else:
+        # find best alignment
+        mnem_finder = MultiSongMnemonicFinder(passage_text, song_folder="songs", 
+                                              use_stresses=use_stresses,
+                                              aug_syllables=aug_syllables_dict)
+        mnem_finder.solve()
+        # mnem_finder.display_soln()

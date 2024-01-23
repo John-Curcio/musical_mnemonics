@@ -22,21 +22,23 @@ default_costs = {
     (1, 2): 0,
     (2, 1): 0,
     # 3 is a new line - very bad to match a syllable with a new line
-    (0, 3): 10,
-    (3, 0): 10,
-    (1, 3): 10,
-    (3, 1): 10,
-    (2, 3): 10,
-    (3, 2): 10,
+    (0, 3): 100,
+    (3, 0): 100,
+    (1, 3): 100,
+    (3, 1): 100,
+    (2, 3): 100,
+    (3, 2): 100,
     # missing syllable
-    # it's worse to skip a syllable in the passage than in the song
-    (-1, 0): 10,
-    (-1, 1): 10,
-    (-1, 2): 10,
+    # match null char with song syllable
+    (-1, 0): 1,
+    (-1, 1): 1,
+    (-1, 2): 1,
     (-1, 3): 0,
-    (0, -1): 1,
-    (1, -1): 1,
-    (2, -1): 1,
+    # it's worse to skip a syllable in the passage than in the song
+    # match passage syllable with null char
+    (0, -1): 10,
+    (1, -1): 10,
+    (2, -1): 10,
     (3, -1): 0,
 }
 
@@ -52,21 +54,33 @@ def dp_solve_stresses(passage_stresses, song_stresses, costs=default_costs):
     def helper(i_p, i_s):
         """
         Returns min-cost alignment of passage_stresses[:i_p+1] and song_stresses[:i_s+1]
+
+        Result is (
+            total cost,
+            marginal cost,
+            step,
+            next_args
+        )
         """
         if i_p < 0:
-            return (0, None, None)
+            temp_cost = 0
+            for s_syllable in song_stresses[:i_s+1]:
+                temp_cost += costs[(-1, s_syllable)]
+            return (temp_cost, temp_cost, None, None)
+            # return (0, 0, None, None)
         if i_s < 0:
             # trying to put a passage line before the first song line
             temp_cost = 0
             for p_syllable in passage_stresses[:i_p+1]:
                 temp_cost += costs[(p_syllable, -1)]
-            return (temp_cost, None, None)
+            return (temp_cost, temp_cost, None, None)
         if passage_stresses[i_p] == song_stresses[i_s]:
             # characters match
-            next_cost, _, _ = helper(i_p-1, i_s-1)
+            next_cost, _, _, _ = helper(i_p-1, i_s-1)
+            this_cost = costs[(passage_stresses[i_p], song_stresses[i_s])]
             return (
-                next_cost + costs[(passage_stresses[i_p], 
-                                   song_stresses[i_s])],
+                next_cost + this_cost,
+                this_cost,
                 (i_p, i_s), # match i_p with i_s
                 (i_p-1, i_s-1) # next soln
             )
@@ -76,41 +90,48 @@ def dp_solve_stresses(passage_stresses, song_stresses, costs=default_costs):
                 # new line in song - can only match with new line in passage
                 # so let's skip syllables in passage, and hope the next syllable
                 # in the passage is a new line
-                next_cost, _, _ = helper(i_p-1, i_s)
+                next_cost, _, _, _ = helper(i_p-1, i_s)
+                this_cost = costs[(passage_stresses[i_p], -1)]
                 return (
-                    next_cost + costs[(passage_stresses[i_p], -1)],
+                    next_cost + this_cost,
+                    this_cost,
                     (i_p, -1), # match i_p with -1 (blank character)
                     (i_p-1, i_s) # next soln
                 )
             if passage_stresses[i_p] == 3:
                 # new line in passage - this is okay to skip!
-                next_cost, _, _ = helper(i_p-1, i_s)
+                next_cost, _, _, _ = helper(i_p-1, i_s)
+                this_cost = costs[(3, -1)]
                 return (
-                    next_cost + costs[(3, -1)],
+                    next_cost + this_cost,
+                    this_cost,
                     (i_p, -1), # match i_p with -1 (blank character)
                     (i_p-1, i_s) # next soln
                 )
             # skip syllable in passage
-            cost_skip_p, _, _ = helper(i_p-1, i_s)
-            cost_skip_p += costs[(passage_stresses[i_p], -1)]
+            cost_skip_p, _, _, _ = helper(i_p-1, i_s)
+            this_cost_skip_p = costs[(passage_stresses[i_p], -1)]
+            cost_skip_p += this_cost_skip_p
             # skip syllable in song
-            cost_skip_s, _, _ = helper(i_p, i_s-1)
-            cost_skip_s += costs[(-1, song_stresses[i_s])]
+            cost_skip_s, _, _, _ = helper(i_p, i_s-1)
+            this_cost_skip_s = costs[(-1, song_stresses[i_s])]
+            cost_skip_s += this_cost_skip_s
             # just match the syllables
-            cost_match, _, _ = helper(i_p-1, i_s-1)
-            cost_match += costs[(passage_stresses[i_p], song_stresses[i_s])]
+            cost_match, _, _, _ = helper(i_p-1, i_s-1)
+            this_cost_match = costs[(passage_stresses[i_p], song_stresses[i_s])]
+            cost_match += this_cost_match
             return min(
-                (cost_skip_p, (i_p, -1), (i_p-1, i_s)),
-                (cost_skip_s, (-1, i_s), (i_p, i_s-1)),
-                (cost_match, (i_p, i_s), (i_p-1, i_s-1)),
+                (cost_skip_p, this_cost_skip_p, (i_p, -1), (i_p-1, i_s)),
+                (cost_skip_s, this_cost_skip_p, (-1, i_s), (i_p, i_s-1)),
+                (cost_match, this_cost_match, (i_p, i_s), (i_p-1, i_s-1)),
                 key=lambda x: x[0]
             )
     
-    cost, step, next_args = helper(len(passage_stresses) - 1, len(song_stresses) - 1)
+    cost, marginal_cost, step, next_args = helper(len(passage_stresses) - 1, len(song_stresses) - 1)
     soln = []
     while step is not None:
-        soln.append(step)
-        _, step, next_args = helper(*next_args)
+        soln.append((*step, marginal_cost))
+        _, marginal_cost, step, next_args = helper(*next_args)
     # reverse the solution - we built it backwards
     soln = soln[::-1]
     return cost, soln
