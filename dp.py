@@ -18,7 +18,7 @@ def default_cost(diff):
 
 class MultiSongMnemonicFinder:
 
-    def __init__(self, passage_text, song_folder, aug_syllables=None, use_stresses=True, custom_cost=None):
+    def __init__(self, passage_text, song_folder, aug_syllables=None, use_stresses=True, custom_cost=None, songs_exclude=None):
         self.passage_text = SingleSongMnemonicFinder.clean_text_keep_newlines_apostrophes(passage_text)
         self.song_folder = song_folder
         if aug_syllables is None:
@@ -28,6 +28,9 @@ class MultiSongMnemonicFinder:
         if custom_cost is None:
             custom_cost = default_cost
         self.custom_cost = custom_cost
+        if songs_exclude is None:
+            songs_exclude = []
+        self.songs_exclude = songs_exclude
         self._cmudict = cmudict.dict()
         self.soln = None
 
@@ -35,8 +38,10 @@ class MultiSongMnemonicFinder:
         # return list of song texts
         songs = {}
         for song in os.listdir(self.song_folder):
-            with open(os.path.join(self.song_folder, song), 'r') as f:
-                songs[song] = f.read()
+            song_file_path = os.path.join(self.song_folder, song)
+            if song_file_path not in self.songs_exclude:
+                with open(os.path.join(self.song_folder, song), 'r') as f:
+                    songs[song] = f.read()
         return songs
 
     def solve(self):
@@ -382,6 +387,8 @@ if __name__ == "__main__":
     # add flag for whether to use stresses or just count syllables, default to syllables
     parser.add_argument("--stress", action="store_true", help="use stresses instead of syllables")
     parser.add_argument("--song_file", help="path to song file")
+    parser.add_argument("--songs_exclude", nargs='*', help="paths to song files to exclude")
+
     # parser.add_argument("song_folder", help="path to folder containing songs")
     args = parser.parse_args()
 
@@ -395,7 +402,6 @@ if __name__ == "__main__":
                           for row in aug_syllables_json["words"]}
 
     use_stresses = args.stress
-    
     if args.song_file is not None:
         # with open(os.path.join("songs", args.song_file), 'r') as f:
         with open(args.song_file, 'r') as f:
@@ -415,6 +421,7 @@ if __name__ == "__main__":
         # find best alignment
         mnem_finder = MultiSongMnemonicFinder(passage_text, song_folder="songs", 
                                               use_stresses=use_stresses,
+                                              songs_exclude=args.songs_exclude,
                                               aug_syllables=aug_syllables_dict)
         mnem_finder.solve()
         # mnem_finder.display_soln()

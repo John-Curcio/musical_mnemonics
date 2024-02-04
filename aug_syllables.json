@@ -55,6 +55,10 @@
         {"word": "thats", "stresses": [1]},
         {"word": "noah", "stresses": [1, 0]},
         {"word": "fermat", "stresses": [0, 1]},
-        {"word": "equiv", "stresses": [0, 1]}
+        {"word": "equiv", "stresses": [0, 1]},
+        {"word": "algo", "stresses": [1, 0]},
+        {"word": "orientation", "stresses": [2,0,2,1,0]},
+        {"word": "camptown", "stresses": [1, 0]},
+        {"word": "nothn", "stresses": [1]}
     ]
 }
