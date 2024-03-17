@@ -1,0 +1,32 @@
+Heapsort
+takes
+O
+n log n time
+O 
+one space
+
+for i
+in range
+# from
+# n div two minus one
+n int div two minus one
+# half n minus one
+# we call heapify on nums i n
+down
+to zero
+we
+call heapify
+on
+# on nums i n
+nums n i
+# for i in range
+next loop
+for i from
+n minus one
+to one
+swap nums
+at zero and i
+and
+call 
+heapify 
+nums i zero

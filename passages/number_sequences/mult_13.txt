@@ -1,0 +1,22 @@
+multiplication by thirteen
+
+one thirteen
+two twenty six
+three thirty nine
+four fifty two
+five sixty five
+six seventy eight
+seven ninety one
+eight one oh four
+nine one seventeen
+ten one thirty
+eleven one forty three
+twelve one fifty six
+thirteen one sixty nine
+fourteen one eighty two
+fifteen one ninety five
+sixteen two eight
+seventeen two twenty one
+eighteen two thirty four
+nineteen two forty seven
+twenty two sixty

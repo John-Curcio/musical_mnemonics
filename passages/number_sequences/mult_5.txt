@@ -1,0 +1,22 @@
+multiplication
+by five
+# five one five
+# five two ten
+# five three fifteen
+# five four twenty
+five five twenty five
+five six thirty
+five seven thirty five
+five eight forty
+five nine forty five
+five ten fifty
+five eleven fifty five
+five twelve sixty
+five thirteen sixty five
+five fourteen seventy
+five fifteen seventy five
+five sixteen eighty
+five seventeen eighty five
+five eighteen ninety
+five nineteen ninety five
+five twenty one hundred

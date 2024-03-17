@@ -1,0 +1,22 @@
+multiplication
+by six
+# six one six
+# six two twelve
+# six three eighteen
+# six four twenty four
+# six five thirty
+six six thirty six
+six seven forty two
+six eight forty eight
+six nine fifty four
+six ten sixty
+six eleven sixty six
+six twelve seventy two
+six thirteen seventy eight
+six fourteen eighty four
+six fifteen ninety
+six sixteen ninety six
+six seventeen one oh two
+six eighteen one oh eight
+six nineteen one fourteen
+six twenty one twenty

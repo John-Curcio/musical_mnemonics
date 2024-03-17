@@ -1,0 +1,21 @@
+multiplication
+by three
+three two six
+three three nine
+three four twelve
+three five fifteen
+three six eighteen
+three seven twenty one
+three eight twenty four
+three nine twenty seven
+three ten thirty
+three eleven thirty three
+three twelve thirty six
+three thirteen thirty nine
+three fourteen forty two
+three fifteen forty five
+three sixteen forty eight
+three seventeen fifty one
+three eighteen fifty four
+three nineteen fifty seven
+three twenty sixty

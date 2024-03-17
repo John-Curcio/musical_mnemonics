@@ -1,0 +1,13 @@
+Here are the decimal exponents
+of Euler exponential count by tenths
+
+one point one one
+one point two two
+one point three five
+one point four nine
+one point six five
+one point eight two
+two point oh one
+two point two three
+two point four six
+two point seven one eight

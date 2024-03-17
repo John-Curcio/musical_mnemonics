@@ -1,0 +1,29 @@
+Square numbers
+
+one
+four
+nine
+sixteen
+twenty five
+thirty six
+forty nine
+sixty four
+eighty one
+one hundred
+one twenty one
+one forty four
+one sixty nine
+one ninety six
+two twenty five
+two fifty six
+two eighty nine
+three twenty four
+three sixty one
+
+
+four hundred
+four forty one
+four eighty four
+five twenty nine
+five seventy six
+six twenty five

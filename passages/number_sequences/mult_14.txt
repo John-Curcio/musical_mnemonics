@@ -1,0 +1,23 @@
+multiplication
+by fourteen
+
+one fourteen
+two twenty eight
+three forty two
+four fifty six
+five seventy
+six eighty four
+seven ninety eight
+eight one twelve
+nine one twenty six
+ten one forty
+eleven one fifty four
+twelve one sixty eight
+thirteen one eighty two
+fourteen one ninety six
+fifteen two ten
+sixteen two twenty four
+seventeen two thirty eight
+eighteen two fifty two
+nineteen two sixty six
+twenty two eighty

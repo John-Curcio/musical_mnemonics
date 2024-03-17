@@ -1,0 +1,15 @@
+binary search
+find an item
+in
+something sorted
+
+
+while left is not past right
+set mid to floor of mean
+if val at mid
+less than key
+set left to mid plus one
+else if val at mid
+more than key
+set right to mid
+else we're done

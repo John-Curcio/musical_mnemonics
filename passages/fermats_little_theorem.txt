@@ -1,0 +1,21 @@
+fermat little theorem
+a and p are co prime
+a to the power of
+just one less than p
+# is one modulo p
+equiv one mod p
+
+
+proof by counting two ways
+first reduce a by modulo p
+consider p length strings
+# a different letters
+alphabet of size a
+
+drop one symbol strings
+the left overs
+form groups of size p
+# group into peas
+
+# fermat little theorem
+# https://en.wikipedia.org/wiki/Proofs_of_Fermat%27s_little_theorem#Necklaces

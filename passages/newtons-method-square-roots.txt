@@ -1,0 +1,6 @@
+Newton's method
+square root of x
+
+Start with a guess
+New guess is the mean
+of x div guess and guess

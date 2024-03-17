@@ -1,0 +1,19 @@
+D F S
+let S be a stack
+S dot push v
+while S not empty
+    set v to S dot pop
+    if v not seen
+        then
+        mark v as seen
+        and
+        push V neighbors on to S
+B F S
+has a queue
+not a stack
+
+both take 
+space E
+and 
+time 
+V plus E

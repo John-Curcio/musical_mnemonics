@@ -1,0 +1,11 @@
+
+Maintain left and right for the rightmost segment match seen so far
+if i L E Q right then we've seen s from i to right before. Its a suffix of s from left to right
+so s i to right matches s i minus left to right minus left. As long as it doesn't go past right, then z at i minus left is a lower bound for z i
+use trivial while loop to increment z i
+update left and right
+
+
+if i between left and right then we have seen s from i to right before.
+It matches with an intermediate segment to the left.
+Then we check whether that intermediate segment matches the prefix of s

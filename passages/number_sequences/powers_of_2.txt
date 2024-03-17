@@ -1,0 +1,17 @@
+Powers of two
+
+two
+four
+eight
+sixteen
+thirty two
+sixty four
+one twenty eight
+two fifty six
+five hundred twelve
+ten twenty four
+twenty forty eight
+forty ninety six
+eighty one ninety two
+sixteen three eighty four
+thirty two seven sixty eight

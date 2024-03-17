@@ -1,0 +1,7 @@
+the sieve of eratosthenes
+the sieve of eratosthenes
+for i in range two square root n plus one
+if i is prime then loop through j
+from i squared up to n plus one
+with step size i and mark j as not prime
+# test

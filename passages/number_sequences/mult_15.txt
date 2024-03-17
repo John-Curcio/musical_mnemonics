@@ -1,0 +1,23 @@
+multiplication
+by fifteen
+
+one fifteen
+two thirty
+three forty-five
+four sixty
+five seventy-five
+six ninety
+seven one oh five
+eight one twenty
+nine one thirty-five
+ten one fifty
+eleven one sixty-five
+twelve one eighty
+thirteen one ninety-five
+fourteen two ten
+fifteen two twenty-five
+sixteen two forty
+seventeen two fifty-five
+eighteen two seventy
+nineteen two eighty-five
+twenty three hundred

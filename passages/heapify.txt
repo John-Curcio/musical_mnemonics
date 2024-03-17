@@ -1,0 +1,20 @@
+heapify
+turns a list
+to a heap
+in place and N time
+
+heapify has arguments
+array n i
+first set left
+at two i plus one
+
+set right to left plus one 
+and
+then swap
+i
+and
+index max
+out of right left i
+
+then call heapify
+nums i index max

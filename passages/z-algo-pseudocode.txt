@@ -1,0 +1,20 @@
+z function 
+finds
+longest prefix match
+loop through i
+up to n
+keep track of left and right
+if i less than right
+set z i to min of
+right minus i
+z at left hops left of i
+while i plus z i 
+less than n
+and
+s at z i
+equals
+s z i plus i
+increment z at i
+if i plus z i past right
+then set l to i
+set r to i plus z i

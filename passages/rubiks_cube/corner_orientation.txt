@@ -1,0 +1,24 @@
+orient the corners
+one corner yellow
+move south west
+two corners yellow
+rotate top
+till a single yellow
+sticker 
+faces front
+south west
+zero yellow
+rotate top
+till a yellow
+sticker
+faces left
+and now here's the algo
+right
+upper
+right prime
+upper
+righty
+upper
+# upper
+twice
+right prime

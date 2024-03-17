@@ -1,0 +1,11 @@
+orient the edges time
+yellow squares form a line
+front
+right
+upper
+right prime
+upper prime
+front prime
+yellow southwest L on top
+little f takes the place of
+front and if no yellow edge there do both

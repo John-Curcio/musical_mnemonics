@@ -1,0 +1,26 @@
+Bolzano and Weierstrass say
+every bounded sequence has a
+convergent subsequence
+
+Start with
+a sub n you know
+it's bounded
+Split the interval in two parts
+
+at least one half
+holds 
+infinite
+lee many terms
+
+et cetera
+
+# nested sequence
+# of closed intervals
+
+# implies
+# accumulation point
+
+Compactness in metric spaces
+Existence of limit points
+continuous function roots
+Measure theory

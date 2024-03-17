@@ -1,0 +1,17 @@
+So
+Newton Raff son 
+finds the zeroes of 
+a function
+start with guess of x
+
+Then we shift x by the ratio of 
+f at x and its slope at x
+
+F needs
+
+nonzero slope
+
+And a good starting guess
+
+And f must behave well
+near the root
